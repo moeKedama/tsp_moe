@@ -12,9 +12,11 @@ class GA(object):
         self.scores = []
         self.iteration = iteration
         self.location = data
+        self.cross_radio = 0.6
         self.ga_choose_ratio = 0.2
-        self.mutate_ratio = 0.2
-        self.variation_radio = 0.01
+        self.mutate_ratio = 0.001
+        self.variation_radio = 0.1
+
         self.shuffle_radio = 0.001
         self.best_epoch = iteration
         # fruits中存每一个个体是下标的list
@@ -173,7 +175,6 @@ class GA(object):
             gene[end] = tmp
             print("p2p variation")
 
-
         return list(gene)
 
     def ga(self):
@@ -189,8 +190,10 @@ class GA(object):
         while len(fruits) < self.num_total:
             # 轮盘赌方式对父代进行选择
             gene_x, gene_y = self.ga_choose(parents_score, parents)
+            gene_x_new, gene_y_new = gene_x, gene_y
             # 交叉
-            gene_x_new, gene_y_new = self.ga_cross(gene_x, gene_y)
+            if np.random.rand() < self.cross_radio:
+                gene_x_new, gene_y_new = self.ga_cross(gene_x, gene_y)
             # 变异率mutate_ratio
             if np.random.rand() < self.mutate_ratio:
                 gene_x_new = self.ga_mutate(gene_x_new)
@@ -258,9 +261,9 @@ def read_tsp(path):
     return data
 
 
-# data = read_tsp('data/st70.tsp')
+data = read_tsp('data/st70.tsp')
 # plt.suptitle('GA in st70.tsp')
-data = read_tsp('data/dsj1000.tsp')
+# data = read_tsp('data/dsj1000.tsp')
 # plt.suptitle('GA in dsj1000.tsp')
 
 data = np.array(data)
@@ -274,7 +277,7 @@ plt.scatter(data[:, 0], data[:, 1], marker=',', s=10)
 plt.show()
 Best, Best_path = math.inf, None
 
-foa = GA(num_city=data.shape[0], num_total=50, iteration=4000, data=data.copy())
+foa = GA(num_city=data.shape[0], num_total=50, iteration=400, data=data.copy())
 path, path_len = foa.run()
 if path_len < Best:
     Best = path_len
